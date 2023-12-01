@@ -1,0 +1,6 @@
+xarray
+openeo
+github
+PyGithub
+rioxarray
+scipy
