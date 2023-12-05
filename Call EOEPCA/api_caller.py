@@ -6,21 +6,20 @@ import time
 import urllib3
 urllib3.disable_warnings() ## temporary fix only!
 
+#####
+# This script will interface directly with the API provided via the ADES running on a deployeed EOEPCA application package. 
+# It allows the entire EOEPCA  processing pipeline to be run from a single Python script, taking the input CWL and input data, and returning
+# the location of the final output as a string. Here the output file will be located in a Min.io bucket.
+#####
+
 base = "https://"
-domain = "192-168-49-2.nip.io"
-ades = f"ades-open.{domain}"
-login = f"auth.{domain}"
+#domain = "192-168-49-2.nip.io"
 user = "eric"
 passW = "defaultPWD"
 clientId = "6195909b-04bc-4d8c-8b92-9cb4e1bdea1f"
 clientSecret = "9a614fe9-b1eb-465d-a0af-85115dcba2e6"
 
-### Complete these lines as required to test the desired files
-cwlLocation = "https://raw.githubusercontent.com/EOEPCA/deployment-guide/main/deploy/samples/requests/processing/snuggs.cwl"
-cwlScriptName = "snuggs-0_3_0"
-inputDataLocation = "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2A_38VNM_20221124_0_L2A"
-inputSExpression = "ndvi:(/ (- B05 B03) (+ B05 B03))"
-######
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -35,7 +34,7 @@ class bcolors:
 
 
 
-def listProcesses():
+def listProcesses(ades):
     ### List processes
     apiQuestion = base + ades + "/" + user + "/wps3/processes"
 
@@ -49,7 +48,7 @@ def listProcesses():
 
     print(json.dumps(rawAnswer.json(), indent=4))
 
-def deployProcess():
+def deployProcess(ades, cwlLocation):
     ### Deploy Process
     
 
@@ -73,7 +72,7 @@ def deployProcess():
 
     print(json.dumps(rawAnswer.json(), indent=4))
 
-def getDeployStatus(deployStatus):
+def getDeployStatus(deployStatus, ades):
     ### Get Deploy Status
 
     apiQuestion = base + ades + deployStatus
@@ -86,7 +85,7 @@ def getDeployStatus(deployStatus):
 
     print(json.dumps(rawAnswer.json(), indent=4))
 
-def executeProcess():
+def executeProcess(ades, cwlScriptName, inputDataLocation, inputSExpression):
     ### Get Execute Status
 
     
@@ -112,7 +111,7 @@ def executeProcess():
     print(json.dumps(rawAnswer.json(), indent=4))
 
 
-def getExecuteStatus(executeStatus):
+def getExecuteStatus(executeStatus, ades):
     ### Get Execute Status
     apiQuestion = base + ades + executeStatus
 
@@ -124,26 +123,55 @@ def getExecuteStatus(executeStatus):
 
     print(json.dumps(rawAnswer.json(), indent=4))
 
+def getProcessingResults(executeStatus, ades):
+    ### Get Processing Results
+    apiQuestion = base + ades + executeStatus + "/result"
 
-listProcesses()
+    apiHeader = {'Accept': 'application/json'}
 
-deployStatus = deployProcess().headers['Location']
+    rawAnswer = requests.get(apiQuestion, headers=apiHeader, verify=False) #verify False due to issue here: https://support.chainstack.com/hc/en-us/articles/9117198436249-Common-SSL-Issues-on-Python-and-How-to-Fix-it
 
-getDeployStatus(deployStatus)
+    return rawAnswer
 
-executeStatus = executeProcess().headers['Location']
+def main(domain: str, cwlLocation: str, cwlScriptName: str, inputDataLocation: str, inputSExpression: str):
+    ades = f"ades-open.{domain}"
+    login = f"auth.{domain}"
 
-status = getExecuteStatus(executeStatus).json()['status']
+    #listProcesses(ades)
 
-while status == "running":
-    time.sleep(10)
-    status = getExecuteStatus(executeStatus).json()['status']
-    print(status)
-    print(getExecuteStatus(executeStatus).json())
+    deployStatus = deployProcess(ades, cwlLocation).headers['Location']
 
-if status == "successful":
-    print(bcolors.OKGREEN + "SUCCESS" + bcolors.ENDC)
+    #getDeployStatus(deployStatus, ades)
 
-if status == "failed":
-    print(bcolors.WARNING + "FAILED" + bcolors.ENDC)
+    executeStatus = executeProcess(ades, cwlScriptName, inputDataLocation, inputSExpression).headers['Location']
 
+    status = getExecuteStatus(executeStatus, ades).json()['status']
+    print(f"Initial status is {bcolors.OKGREEN + status.upper() + bcolors.ENDC} please wait for processing to finish")
+    while status == "running":
+        #time.sleep(10)can I bold
+        status = getExecuteStatus(executeStatus, ades).json()['status']
+        #print(status)
+        #print(getExecuteStatus(executeStatus, ades).json())
+
+    if status == "successful":
+        ## Return location of minio data catalogue
+        out_location = getProcessingResults(executeStatus, ades).json()['StacCatalogUri'] ## = "s3://eoepca/wf-9e9adfb8-9364-11ee-b004-0242ac110006/catalog.json"
+        return out_location
+
+    if status == "failed":
+        message = getExecuteStatus(executeStatus, ades).json()['message']
+        print("Exception raised, message is " + message)
+        return False
+
+
+
+if __name__ == "__main__":
+    ### Complete these lines as required to test the desired files
+    cwlLocation = "https://raw.githubusercontent.com/EOEPCA/deployment-guide/main/deploy/samples/requests/processing/snuggs.cwl"
+    cwlScriptName = "snuggs-0_3_0"
+    inputDataLocation = "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2A_38VNM_20221124_0_L2A"
+    inputSExpression = "ndvi:(/ (- B05 B03) (+ B05 B03))"
+    domain = "192-168-49-2.nip.io"
+    ######
+
+    print(main(domain, cwlLocation, cwlScriptName, inputDataLocation, inputSExpression))
