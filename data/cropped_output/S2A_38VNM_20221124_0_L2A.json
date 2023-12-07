@@ -45,22 +45,22 @@
     "ndvi": {
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
       "roles": ["data"],
-      "href": "ndvi.tif",
+      "href": "https://raw.githubusercontent.com/tjellicoe-tpzuk/openEO_read-write/main/data/cropped_output/ndvi.tif",
       "s-expression": "(/ (- B05 B03) (+ B05 B03))",
       "file:size": 80925782
     }
   },
   "links": [
-    { "type": "application/json", "rel": "parent", "href": "../catalog.json" },
+    { "type": "application/json", "rel": "parent", "href": "https://raw.githubusercontent.com/tjellicoe-tpzuk/openEO_read-write/main/data/cropped_output/catalog.json" },
     {
       "type": "application/geo+json",
       "rel": "self",
-      "href": "s3://eoepca/wf-027d6052-9043-11ee-8cb4-0242ac110006/S2A_38VNM_20221124_0_L2A/S2A_38VNM_20221124_0_L2A.json"
+      "href": "https://raw.githubusercontent.com/tjellicoe-tpzuk/openEO_read-write/main/data/cropped_output/S2A_38VNM_20221124_0_L2A.json"
     },
     {
       "type": "application/json",
       "rel": "root",
-      "href": "s3://eoepca/wf-027d6052-9043-11ee-8cb4-0242ac110006/catalog.json"
+      "href": "https://raw.githubusercontent.com/tjellicoe-tpzuk/openEO_read-write/main/data/cropped_output/catalog.json"
     }
   ]
 }
