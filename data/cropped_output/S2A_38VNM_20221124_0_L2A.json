@@ -1,0 +1,66 @@
+{
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/eo/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/view/v1.0.0/schema.json"
+  ],
+  "type": "Feature",
+  "id": "S2A_38VNM_20221124_0_L2A",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [46.960096489, 60.329671217],
+        [46.848071932, 60.388390101],
+        [46.848071932, 60.388390101],
+        [46.960096489, 60.388390101],
+        [46.960096489, 60.329671217]
+      ]
+    ]
+  },
+  "properties": {
+    "datetime": "2022-11-24T08:33:06Z",
+    "platform": "sentinel-2a",
+    "constellation": "sentinel-2",
+    "instruments": ["msi"],
+    "gsd": 10,
+    "view:off_nadir": 0,
+    "proj:epsg": 32638,
+    "sentinel:utm_zone": 38,
+    "sentinel:latitude_band": "V",
+    "sentinel:grid_square": "NM",
+    "sentinel:sequence": "0",
+    "sentinel:product_id": "S2A_MSIL2A_20221124T083251_N0400_R021_T38VNM_20221124T092055",
+    "sentinel:data_coverage": 13.77,
+    "eo:cloud_cover": 99.85,
+    "sentinel:valid_cloud_cover": true,
+    "sentinel:processing_baseline": "04.00",
+    "sentinel:boa_offset_applied": true,
+    "created": "2022-11-24T11:02:51.154Z",
+    "updated": "2022-11-24T11:02:51.154Z"
+  },
+  "bbox": [46.848071932, 60.329671217, 46.960096489, 60.388390101],
+  "assets": {
+    "ndvi": {
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "roles": ["data"],
+      "href": "ndvi.tif",
+      "s-expression": "(/ (- B05 B03) (+ B05 B03))",
+      "file:size": 80925782
+    }
+  },
+  "links": [
+    { "type": "application/json", "rel": "parent", "href": "../catalog.json" },
+    {
+      "type": "application/geo+json",
+      "rel": "self",
+      "href": "s3://eoepca/wf-027d6052-9043-11ee-8cb4-0242ac110006/S2A_38VNM_20221124_0_L2A/S2A_38VNM_20221124_0_L2A.json"
+    },
+    {
+      "type": "application/json",
+      "rel": "root",
+      "href": "s3://eoepca/wf-027d6052-9043-11ee-8cb4-0242ac110006/catalog.json"
+    }
+  ]
+}
